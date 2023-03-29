@@ -1,3 +1,7 @@
+// Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
+// MIT License - See LICENSE file in the root directory
+// Boris Pedraza, Alex Villazon
+
 var alertTitle = document.getElementById("alert_title");
 var alertMessage = document.getElementById("alert_message");
 

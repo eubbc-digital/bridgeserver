@@ -29,6 +29,7 @@ COPY app /app/app
 COPY vnc.html /app/vnc.html
 COPY vnc.html /app/index.html
 COPY alert_page.html /app/alert_page.html
+COPY utils /app/utils
 
 WORKDIR /app
 

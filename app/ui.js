@@ -1,6 +1,8 @@
-// Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
-// MIT License - See LICENSE file in the root directory
-// Boris Pedraza, Alex Villazon
+/*
+ Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
+ MIT License - See LICENSE file in the root directory
+ Boris Pedraza, Alex Villazon
+*/
 
 /*
  * noVNC: HTML5 VNC client
@@ -1844,7 +1846,7 @@ const BOOKING_VALIDATION= {
 }
 
 var accessPassword = null;
-var credentialsData= await fetch('../../credentials.json');
+var credentialsData= await fetch('../../../credentials.json');
 credentialsData= await credentialsData.json();
 
 const urlParams = new URLSearchParams(window.location.search);

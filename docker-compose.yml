@@ -6,7 +6,7 @@ services:
        - server.env
     image: bridgeserver
     volumes:
-      - ./credentials.json:/credentials.json
+      - ./credentials.json:/app/credentials.json
     ports:
       - "6080:6080"
     deploy:

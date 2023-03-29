@@ -1,0 +1,15 @@
+version: "3"
+services:
+  bridgeserver:
+    build: .
+    env_file:
+       - server.env
+    image: bridgeserver
+    volumes:
+      - ./utils/credentials.json:/app/utils/credentials.json
+    ports:
+      - "80:6080"
+    deploy:
+      restart_policy:
+        condition: on-failure
+

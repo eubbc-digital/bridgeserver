@@ -1844,7 +1844,7 @@ const BOOKING_VALIDATION= {
 }
 
 var accessPassword = null;
-var credentialsData= await fetch('../utils/credentials.json');
+var credentialsData= await fetch('../../credentials.json');
 credentialsData= await credentialsData.json();
 
 const urlParams = new URLSearchParams(window.location.search);

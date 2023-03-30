@@ -2,7 +2,7 @@ FROM alpine:3.13.5
 
 ENV VNC_SERVER "research.upb.edu:5901"
 ENV NOVNC_TAG="v1.4.0"
-ENV WEBSOCKIFY_TAG="v0.10.0"
+ENV WEBSOCKIFY_TAG="v0.11.0"
 
 RUN apk --no-cache --update --upgrade add \
     bash \
@@ -27,4 +27,4 @@ COPY alert_page.html /app/alert_page.html
 
 WORKDIR /app
 
-ENTRYPOINT [ "bash", "-c", "/app/utils/novnc_proxy --vnc ${VNC_SERVER}" ]
+ENTRYPOINT [ "bash", "-c", "/app/utils/novnc_proxy --vnc ${VNC_SERVER} --file-only" ]

@@ -62,15 +62,15 @@ To stop the service, you can simply running the following command:
 You can customize the port of the bridge server, for example, to use the default HTTP port 80. 
 Simply, change the following line in the `docker-compose.yml` file:
 
-``
+```
 ports:
   - "68080:6080"
-``
+```
 to
-``
+```
 ports:
   - "80:6080"
-``
+```
 Then you will be able to access the remote lab directly through `http://name_of_server`
 
 ## Using Book4RLab with your Remote Lab

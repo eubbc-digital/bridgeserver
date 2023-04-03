@@ -83,8 +83,12 @@ The student can book a time slot in the Book4RLab system, and the credentials wi
 
 ### Students reservation of a time slot. 
 - The students can book a time slot for the Remote Lab registered by the instructor, depending on the available time slots. 
-- The reservation will generate a URL and a QR code, containing the URL of the bridge server, which will include an `access_key` (and a `pwd` parameter if the session is public). 
-- The generated URL (e.g. `http://name_of_server?access_key=xxxxxxxxxx`, where `xxxxxxxxxx` is the key to validate the reservation. 
+- The reservation will generate a URL and a QR code, containing the URL of the bridge 
+server, which will include an `access_key` and a `pwd` parameters (only `access_key` if 
+the session is public). 
+- The generated URL (e.g. `http://name_of_server?access_key=xxxxxxxxxx&pwd=yyyyy`, where 
+`xxxxxxxxxx` is the key to validate the reservation and `yyyyy` is the key to validate a
+ private reservation. 
   
 
 ## Authors

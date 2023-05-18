@@ -7,8 +7,19 @@ app.use(express.static('public/', {
   defaultFiles: ['vnc.html'],
 }));
 
+function validateReferer(req, res, next){
+  const referer = req.get('referer');
+  const allowedReferer = process.env.REFERER;
+
+  if (referer && referer.startsWith(allowedReferer)){
+    next();
+  } else{
+    res.status(403).send('Forbidden')
+  }
+
+}
 // Proxy route to forward the API request
-app.get('/api/credentials', async (req, res) => {
+app.get('/api/credentials', validateReferer, (req, res) => {
   const response = {
     password: process.env.PASSWORD,
     view_only_password: process.env.VIEW_ONLY_PASSWORD,

@@ -31,16 +31,12 @@ Once the build is ready, the Docker image of the bridgeserver will be ready for 
 
 ### Configuration of the Bridge Server
 
-You need to edit the `credentials.json` file to set the following parameters:
-- `password`: The VNC password for full control that you configured in the TightVNC Server. This is for private sessions reserved in Book4RLab.
-- `viewOnlyPassword`: The VNC "view only" password for public sessions reserved in Book4RLab. This allows other remote lab users to only see what other student is doing, but not to control the remote equipment. 
-- `bookingUrl`: The Book4RLab URL for validation of sessions. By default it points to the centralized Booking System at `https://eubbc-digital.upb.edu/booking/`
-
-You also need to configure the `server.env` file to point to your VNC Server. 
-The `VNC_SERVER` parameter is set by default as follows:
-`VNC_SERVER=localhost:5900`
-
-You must put the IP of the VNC Server of your Remote Lab, and the corresponding port. By default, VNC server use port `5900`. Please check the TighVNC server setting.
+You need to edit the `server.env` file to set the following parameters:
+- `PASSWORD`: The VNC password for full control that you configured in the TightVNC Server. This is for private sessions reserved in Book4RLab.
+- `VIEW_ONLY_PASSWORD`: The VNC "view only" password for public sessions reserved in Book4RLab. This allows other remote lab users to only see what other student is doing, but not to control the remote equipment. 
+- `BOOKING_URL`: The Book4RLab URL for validation of sessions. By default it points to the centralized Booking System at `https://eubbc-digital.upb.edu/booking/`
+- `VNC_SERVER_IP_ADDRESS`: The VNC server ip address of your Remote Lab.
+- `VNC_SERVER_PORT`: The VNC server port. By default, VNC server use port `5900`. Please check the TighVNC server setting.
 
 ### Running the Bridge Server
 Once configured, you can deploy the service running the following command:
@@ -51,12 +47,11 @@ This command will deploy the service permanently, even if the host is rebooted.
 
 You can now access the Remote Lab bridge service through a web browser using the host name of the bridge server:
 
-`http://name_of_server:6080`
+`http://name_of_server:3000`
 
 ### Stopping the Bridge Server
 To stop the service, you can simply running the following command: 
 `docker-compose down`
-
 
 ### Customizing the port on the bridge server
 You can customize the port of the bridge server, for example, to use the default HTTP port 80. 
@@ -64,14 +59,21 @@ Simply, change the following line in the `docker-compose.yml` file:
 
 ```
 ports:
-  - "68080:6080"
+  - "3000:3000"
 ```
 to
 ```
 ports:
-  - "80:6080"
+  - "80:3000"
 ```
 Then you will be able to access the remote lab directly through `http://name_of_server`
+
+
+Is not recommended to change the port:
+```
+- "6080:6080"
+```
+Because this is the default port that is proxying the websocket traffic between the VNC server and the webpage.
 
 ## Using Book4RLab with your Remote Lab
 In order to avoid sharing the VNC password with the students, the bridge server automatizes the access to the VNC Server without exposing the password. 

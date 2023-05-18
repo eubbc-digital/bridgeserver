@@ -1,8 +1,9 @@
-FROM alpine:3.13.5
+FROM node:16-alpine
 
-ENV VNC_SERVER "research.upb.edu:5901"
 ENV NOVNC_TAG="v1.4.0"
 ENV WEBSOCKIFY_TAG="v0.11.0"
+
+WORKDIR /app
 
 RUN apk --no-cache --update --upgrade add \
     bash \
@@ -14,17 +15,20 @@ RUN apk --no-cache --update --upgrade add \
     git
 
 RUN pip install --no-cache-dir numpy
-RUN ln -s /usr/bin/python3 /usr/bin/python
+
+RUN mkdir public
 
 RUN git config --global advice.detachedHead false && \
-  git clone https://github.com/novnc/noVNC --branch ${NOVNC_TAG} /app && \
-  git clone https://github.com/novnc/websockify --branch ${WEBSOCKIFY_TAG} /app/utils/websockify
+  git clone https://github.com/novnc/noVNC --branch ${NOVNC_TAG} /app/public && \
+  git clone https://github.com/novnc/websockify --branch ${WEBSOCKIFY_TAG} /app/public/utils/websockify
 
-COPY app /app/app
-COPY vnc.html /app/vnc.html
-COPY vnc.html /app/index.html
-COPY alert_page.html /app/alert_page.html
+COPY app.js /app/app.js
+COPY webpage_files/app /app/public/app
+COPY webpage_files/vnc.html /app/public/index.html
+COPY webpage_files/alert_page.html /app/public/alert_page.html
+COPY run_app.sh /app/run_app.sh
+COPY package*.json ./
 
-WORKDIR /app
+RUN npm install
 
-ENTRYPOINT [ "bash", "-c", "/app/utils/novnc_proxy --vnc ${VNC_SERVER} --file-only" ]
+CMD ./run_app.sh

@@ -24,6 +24,7 @@ body{
 .content{
   display: flex;
   align-items:center;
+  color: white;
 }
 .icon{
   padding: 0.5rem;
@@ -47,4 +48,9 @@ body{
 
 h3{
   margin: 15px;
+  color: white;
+}
+
+a{
+  color: #3c3cff;
 }

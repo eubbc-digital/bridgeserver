@@ -5,9 +5,8 @@ services:
     env_file:
        - server.env
     image: bridgeserver
-    volumes:
-      - ./utils/credentials.json:/app/utils/credentials.json
     ports:
+      - "3000:3000"
       - "6080:6080"
     deploy:
       restart_policy:

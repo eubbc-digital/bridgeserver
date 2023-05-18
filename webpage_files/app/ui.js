@@ -1,10 +1,4 @@
 /*
- Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
- MIT License - See LICENSE file in the root directory
- Boris Pedraza, Alex Villazon
-*/
-
-/*
  * noVNC: HTML5 VNC client
  * Copyright (C) 2019 The noVNC Authors
  * Licensed under MPL 2.0 (see LICENSE.txt)
@@ -27,7 +21,7 @@ import * as WebUtil from "./webutil.js";
 const PAGE_TITLE = "noVNC";
 
 const UI = {
-
+    accessPassword: null,
     connected: false,
     desktopName: "",
 
@@ -60,8 +54,8 @@ const UI = {
         });
     },
 
-    // Render default UI and initialize settings menu
-    start() {
+      // Render default UI and initialize settings menu
+      start() {
 
         UI.initSettings();
 
@@ -1006,15 +1000,16 @@ const UI = {
     },
 
     connect(event, password) {
-        password = accessPassword; 
+        password = UI.accessPassword; 
 
         // Ignore when rfb already exists
         if (typeof UI.rfb !== 'undefined') {
             return;
         }
 
+        // const port = UI.getSetting('port');
         const host = UI.getSetting('host');
-        const port = UI.getSetting('port');
+        const port = 6080; 
         const path = UI.getSetting('path');
 
         if (typeof password === 'undefined') {
@@ -1785,74 +1780,5 @@ if (l10n.language === "en" || l10n.dictionary !== undefined) {
         .catch(err => Log.Error("Failed to load translations: " + err))
         .then(UI.prime);
 }
-
-const TIMER = {
-  timer_function(end_date){
-    // Update the count down every 1 second
-    var x = setInterval(function() {
-      // Get todays date and time
-      var now = new Date().getTime();
-
-      // Find the distance between now an the count down date
-      var distance = end_date - now;
-
-      // Time calculations for days, hours, minutes and seconds
-      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      // Output the result in an element with id="timer"
-      document.getElementById("timer").innerHTML = `${hours}h : ${minutes}m : ${seconds}s`;
-
-      // If the count down is over, write some text 
-      if (distance < 0) {
-        accessPassword = null;
-        clearInterval(x);
-        document.getElementById("timer").innerHTML = "TIME COMPLETED";
-        UI.disconnect();
-        window.location.pathname = "../alert_page.html"
-      }
-    }, 1000);
-  }
-}
-
-const BOOKING_VALIDATION= {
-  async validateReservation(pwd, accessKey){
-    if (accessKey != null) {
-      var url =`${credentialsData.bookingUrl}api/reservation/?access_key=${accessKey}`;
-      if (pwd != null) { 
-        url = `${url}&pwd=${pwd}`;
-        accessPassword = credentialsData.password;
-      } else {
-        accessPassword = credentialsData.viewOnlyPassword;
-      }
-      const response_booking_api = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      });
-          
-      const data = await response_booking_api.json();
-      if (data.length) {
-        var end_date = new Date(data[0].end_date).getTime();
-        TIMER.timer_function(end_date);
-      } else {
-        accessPassword = null;
-        window.location.pathname = "../alert_page.html"
-      }
-    }
-  }
-}
-
-var accessPassword = null;
-var credentialsData= await fetch('../utils/credentials.json');
-credentialsData= await credentialsData.json();
-
-const urlParams = new URLSearchParams(window.location.search);
-const bookingAccessKey = urlParams.get('access_key');
-const bookingPwd = urlParams.get('pwd');
-
-BOOKING_VALIDATION.validateReservation(bookingPwd, bookingAccessKey);
 
 export default UI;

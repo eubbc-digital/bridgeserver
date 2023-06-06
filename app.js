@@ -15,7 +15,7 @@ app.use(express.static('public/', {
 
 function validateReferer(req, res, next){
   const referer = req.get('referer');
-  const allowedReferer = process.env.REFERER;
+  const allowedReferer = process.env.REFERER + ':' + process.env.BRIDGE_PORT;
 
   if (referer && referer.startsWith(allowedReferer)){
     next();

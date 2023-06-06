@@ -3,11 +3,11 @@ services:
   bridgeserver:
     build: .
     env_file:
-       - server.env
+       - .env
     image: bridgeserver
     ports:
-      - "3000:3000"
-      - "6080:6080"
+      - ${BRIDGE_PORT}:3000
+      - ${SERVICE_PORT}:6080
     deploy:
       restart_policy:
         condition: on-failure

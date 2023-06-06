@@ -7,42 +7,54 @@
 import TIMER from './timer.js';
 import UI from './ui.js';
 
-var credentialsData = await fetch('api/credentials');
-credentialsData = await credentialsData.json();
+try {
+  var credentialsData = await fetch('api/credentials');
+  if (!credentialsData.ok) {
+    throw new Error('Error fetching credentials');
+  }
+  credentialsData = await credentialsData.json();
+} catch (error) {
+  var encodedMessage = encodeURIComponent("Error fetching the credentials");
+  var redirectURL = "../alert_page.html?message=" + encodedMessage;
+  window.location.href = redirectURL;
+}
 
-const urlParams = new URLSearchParams(window.location.search);
-const bookingAccessKey = urlParams.get('access_key');
-const bookingPwd = urlParams.get('pwd');
-
-const BOOKING_VALIDATION= {
-  async validateReservation(pwd, accessKey){
-    if (accessKey != null) {
-      var url =`${credentialsData.booking_url}api/reservation/?access_key=${accessKey}`;
-      if (pwd != null) { 
-        url = `${url}&pwd=${pwd}`;
-        UI.accessPassword = credentialsData.password;
-      } else {
-        UI.accessPassword = credentialsData.view_only_password;
-      }
-      const response_booking_api = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      });
-          
-      const data = await response_booking_api.json();
-      if (data.length) {
-        var end_date = new Date(data[0].end_date).getTime();
-        TIMER.timer_function(end_date);
-      } else {
-        UI.accessPassword = null;
-        window.location.pathname = "../alert_page.html"
-      }
+async function validateReservation(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const bookingData = {
+    bookingAccessKey: urlParams.get('access_key'),
+    bookingPwd: urlParams.get('pwd')
+  }
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingData)
+  };
+  try {
+    const response = await fetch('/api/bookingValidation', requestOptions);
+    if (!response.ok) {
+      throw new Error('Error fetching credentials');
     }
+    const data = await response.json();
+    if (JSON.stringify(data) !== '{}') {
+      if(data.public){
+        UI.accessPassword = credentialsData.viewOnlyPassword;
+      } else {
+        UI.accessPassword = credentialsData.password;
+      }
+      var end_date = new Date(data.endDate).getTime();
+      TIMER.timer_function(end_date);
+    } else {
+      UI.accessPassword = null;
+      var encodedMessage = encodeURIComponent("Invalid booking");
+      var redirectURL = "../alert_page.html?message=" + encodedMessage + "&alert=1";
+      window.location.href = redirectURL;
+    }
+  } catch (error) {
+    var encodedMessage = encodeURIComponent("Error retrieving the booking data");
+    var redirectURL = "../alert_page.html?message=" + encodedMessage;
+    window.location.href = redirectURL;
   }
 }
 
-BOOKING_VALIDATION.validateReservation(bookingPwd, bookingAccessKey);
-
-export default BOOKING_VALIDATION;
+validateReservation();

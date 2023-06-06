@@ -1,14 +1,12 @@
 const express = require('express'),
   app = express(),
-  port = parseInt(process.env.PORT,10) || 3000;
+  port = 3000;
 
 const fetch = require("node-fetch");
 require('dotenv').config();
 
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
-
-// Serve static files from the public directory
 app.use(express.static('public/', {
   defaultFiles: ['vnc.html'],
 }));
@@ -24,7 +22,6 @@ function validateReferer(req, res, next){
   }
 }
 
-// Proxy route to forward the API request
 app.get('/api/credentials', validateReferer, (req, res) => {
   const response = {
     password: process.env.PASSWORD,
@@ -50,24 +47,31 @@ app.post('/api/bookingValidation', async (req, res) => {
     } else {
       public = true;
     }
-    const response_booking_api = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    });
-    const data = await response_booking_api.json();
-    if (data.length){
-      response = {
-        public: public,
-        endDate: data[0].end_date
+    try {
+      var response_booking_api= await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      if (!response_booking_api.ok) {
+        throw new Error('Error fetching data');
       }
+
+      response_booking_api = await response_booking_api.json();
+      if (response_booking_api.length){
+        response = {
+          public: public,
+          endDate: response_booking_api[0].end_date
+        }
+      }
+      res.json(response);
+    } catch (error) {
+      console.error('Error:', error);
     }
   }
-  res.json(response);
 });
 
-// Start the server
 app.listen(port, () => {
   console.log('Server is running on port localhost:3000');
 });

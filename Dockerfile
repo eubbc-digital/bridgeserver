@@ -27,6 +27,7 @@ COPY webpage_files/app /app/public/app
 COPY webpage_files/vnc.html /app/public/index.html
 COPY webpage_files/alert_page.html /app/public/alert_page.html
 COPY run_app.sh /app/run_app.sh
+RUN sed -i 's/\r$//' /app/run_app.sh && chmod +x /app/run_app.sh
 COPY package*.json ./
 
 RUN npm install

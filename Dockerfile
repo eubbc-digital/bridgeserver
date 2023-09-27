@@ -1,3 +1,7 @@
+# Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
+# MIT License - See LICENSE file in the root directory
+# Boris Pedraza, Alex Villazon
+
 FROM node:16-alpine
 
 ENV NOVNC_TAG="v1.4.0"

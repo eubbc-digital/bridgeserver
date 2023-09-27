@@ -1,3 +1,9 @@
+/*
+Copyright (c) Universidad Privada Boliviana (UPB) - EUBBC-Digital
+MIT License - See LICENSE file in the root directory
+Boris Pedraza, Alex Villazon
+*/
+
 const express = require('express');
 const app = express();
 require('dotenv').config();

@@ -30,7 +30,7 @@ const TIMER = {
         UI.accessPassword = null;
         clearInterval(x);
         document.getElementById("timer").innerHTML = "TIME COMPLETED";
-        window.location.pathname = "../alert_page.html"
+        window.location.href = window.location.origin + '/lab/alert_page.html';
       }
     }, 1000);
   }

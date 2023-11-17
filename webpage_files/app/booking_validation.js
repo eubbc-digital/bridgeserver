@@ -37,8 +37,10 @@ const BOOKING_VALIDATION= {
         TIMER.timer_function(end_date);
       } else {
         UI.accessPassword = null;
-        window.location.pathname = "../alert_page.html"
+        window.location.href = window.location.origin + '/lab/alert_page.html';
       }
+    } else {
+      window.location.href = window.location.origin + '/lab/alert_page.html';
     }
   }
 }

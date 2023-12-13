@@ -38,7 +38,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="app/styles/base.css">
     <link rel="stylesheet" href="app/styles/input.css">
-    <link rel="stylesheet" href="app/styles/timer.css">
+    <link rel="stylesheet" href="app/styles/extras.css">
 
     <!-- Images that will later appear via CSS -->
     <link rel="preload" as="image" href="app/images/info.svg">
@@ -49,6 +49,7 @@
     <script type="module" crossorigin="anonymous" src="app/ui.js"></script>
     <script type="module" src="app/booking_validation.js"></script>
     <script type="module" src="app/timer.js"></script>
+    <script type="module" src="app/download.js"></script>
 </head>
 
 <body>
@@ -348,5 +349,10 @@
         <source src="app/sounds/bell.mp3" type="audio/mpeg">
     </audio>
 
+    <div id="wrapper_download_button">
+      <button id="download_button">
+        Download Files 
+      </button>
+    </div>
  </body>
 </html>

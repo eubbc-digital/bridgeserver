@@ -1,8 +1,10 @@
 const express = require('express');
 const app = express();
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
 require('dotenv').config();
 
-// Serve static files from the public directory
 app.use(express.static('public/', {
   defaultFiles: ['vnc.html'],
 }));
@@ -16,9 +18,8 @@ function validateReferer(req, res, next){
   } else{
     res.status(403).send('Forbidden')
   }
-
 }
-// Proxy route to forward the API request
+
 app.get('/api/credentials', validateReferer, (req, res) => {
   const response = {
     password: process.env.PASSWORD,
@@ -28,8 +29,35 @@ app.get('/api/credentials', validateReferer, (req, res) => {
   res.json(response);
 });
 
-// Start the server
-app.listen(3000, () => {
-  console.log('Server is running on port localhost:3000');
+app.get('/download-files', (req, res) => {
+  const directoryToServe = '/app/lab_files';
+  const zipFileName = 'lab_files.zip';
+
+  const archive = archiver('zip', {
+    zlib: { level: 9 },
+  });
+
+  archive.pipe(res);
+
+  fs.readdir(directoryToServe, (err, files) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error reading directory');
+      return;
+    }
+
+    files.forEach((file) => {
+      const filePath = path.join(directoryToServe, file);
+      archive.file(filePath, { name: file });
+    });
+
+    archive.finalize();
+  });
+
+  res.attachment(zipFileName);
+});
+
+app.listen(3002, () => {
+  console.log('Server is running on port localhost:3002');
 });
 

@@ -1,0 +1,36 @@
+.timer-container {
+  width: 300px;
+  margin: auto;
+  border: 3px solid white;
+}
+
+#timer{
+  text-align: center;
+  font-size: 25px;
+  color: white;
+}
+
+#wrapper_download_button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#download_button{
+  margin: 5px 0;
+  width: 10%;
+
+  cursor: pointer;
+
+  border-color: rgb(83, 99, 122);
+  border-radius: 15px;
+
+  background: linear-gradient(to top, rgb(110, 132, 163), rgb(99, 119, 147));
+  color: white;
+
+  vertical-align: middle;
+}
+
+#download_button:hover {
+  background: linear-gradient(to top, rgb(110, 132, 163), rgb(105, 125, 155));
+}

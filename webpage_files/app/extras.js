@@ -25,7 +25,7 @@ function timerControl(endDate) {
   }, 1000);
 }
 
-async function validateReservation(pwd, accessKey) {
+async function validateReservation(pwd, accessKey, credentialsData) {
   if (accessKey != null) {
     var url = `${credentialsData.booking_url}api/reservation/?access_key=${accessKey}`;
     if (pwd != null) {
@@ -100,7 +100,7 @@ async function init() {
   const urlParams = new URLSearchParams(window.location.search);
   const bookingAccessKey = urlParams.get('access_key');
   const bookingPwd = urlParams.get('pwd');
-  validateReservation(bookingPwd, bookingAccessKey)
+  validateReservation(bookingPwd, bookingAccessKey, credentialsData)
 
   const downloadButton = document.getElementById('download_button');
   downloadButton.addEventListener('click', handleFileDownload);

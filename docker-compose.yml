@@ -8,9 +8,9 @@ services:
     ports:
       - "3002:3002"
       - "6080:6080"
+      - "8001:8001"
     volumes:
       - /home/adriana/resources/usp_lab_files:/app/lab_files
     deploy:
       restart_policy:
         condition: on-failure
-

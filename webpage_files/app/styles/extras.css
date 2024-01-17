@@ -4,19 +4,19 @@
   border: 3px solid white;
 }
 
-#timer{
+#timer {
   text-align: center;
   font-size: 25px;
   color: white;
 }
 
-#wrapper_download_button{
+#wrapper_download_button {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-#download_button{
+#download_button {
   margin: 5px 0;
   width: 10%;
 
@@ -33,4 +33,28 @@
 
 #download_button:hover {
   background: linear-gradient(to top, rgb(110, 132, 163), rgb(105, 125, 155));
+}
+
+#video-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+#video-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#close-modal-wrapper {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
 }

@@ -47,14 +47,26 @@
 
     <script type="module" crossorigin="anonymous" src="app/error-handler.js"></script>
     <script type="module" crossorigin="anonymous" src="app/ui.js"></script>
-    <script type="module" src="app/booking_validation.js"></script>
-    <script type="module" src="app/timer.js"></script>
-    <script type="module" src="app/download.js"></script>
+    <script type="module" src="app/extras.js"></script>
+    <script type="module" src="app/jsmpeg.min.js"></script>
 </head>
 
 <body>
     <div id="timer-container" class="timer-container">
       <h2 id="timer"></h2>
+    </div>
+
+    <div id="initial-view">
+        <button id="show-stream-button">Show Stream</button>
+    </div>
+
+    <div id="video-modal" style="display: none;">
+        <div id="video-modal-content">
+            <canvas id="modal-video-canvas" width="640" height="360"></canvas>
+            <div id="close-modal-wrapper">
+                <button id="close-modal-button">Close</button>
+            </div>
+        </div>
     </div>
 
     <div id="noVNC_fallback_error" class="noVNC_center">

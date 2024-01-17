@@ -31,5 +31,6 @@ RUN sed -i 's/\r$//' /app/run_app.sh && chmod +x /app/run_app.sh
 COPY package*.json ./
 
 RUN npm install
+RUN apk --no-cache add ffmpeg
 
 CMD ./run_app.sh

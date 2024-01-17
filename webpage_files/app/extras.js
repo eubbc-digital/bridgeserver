@@ -4,6 +4,7 @@
  Boris Pedraza, Alex Villazon
 */
 import UI from './ui.js';
+import JSMpeg from './jsmpeg.min.js';
 
 function timerControl(endDate) {
   var x = setInterval(function() {
@@ -105,7 +106,7 @@ async function init() {
   const downloadButton = document.getElementById('download_button');
   downloadButton.addEventListener('click', handleFileDownload);
 
-  const url = 'ws://eubbc-digital.upb.edu/usp-lab/camera/';
+  const url = 'wss://eubbc-digital.upb.edu/usp-lab/camera/';
   initializeVideoStream(url)
 }
 

@@ -80,18 +80,18 @@ function initializeVideoStream(url) {
   var player = new JSMpeg.Player(url, { canvas: modalCanvas });
 
   var showStreamButton = document.getElementById('show-stream-button');
-  var initialView = document.getElementById('initial-view');
+  var showStreamWrapperButton = document.getElementById('show-stream-wrapper-button');
   var videoModal = document.getElementById('video-modal');
   var closeModalButton = document.getElementById('close-modal-button');
 
   showStreamButton.addEventListener('click', function() {
-    initialView.style.display = 'none';
+    showStreamWrapperButton.style.display = 'none';
     videoModal.style.display = 'block';
   });
 
   closeModalButton.addEventListener('click', function() {
     videoModal.style.display = 'none';
-    initialView.style.display = 'block';
+    showStreamWrapperButton.style.display = 'block';
   });
 }
 
@@ -103,7 +103,7 @@ async function init() {
   const bookingPwd = urlParams.get('pwd');
   validateReservation(bookingPwd, bookingAccessKey, credentialsData)
 
-  const downloadButton = document.getElementById('download_button');
+  const downloadButton = document.getElementById('download-button');
   downloadButton.addEventListener('click', handleFileDownload);
 
   const url = 'wss://eubbc-digital.upb.edu/usp-lab/camera/';

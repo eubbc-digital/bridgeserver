@@ -6,13 +6,13 @@ ENV WEBSOCKIFY_TAG="v0.11.0"
 WORKDIR /app
 
 RUN apk --no-cache --update --upgrade add \
-    bash \
-    python3 \
-    python3-dev \
-    py-pip \
-    build-base \
-    procps \
-    git
+  bash \
+  python3 \
+  python3-dev \
+  py-pip \
+  build-base \
+  procps \
+  git
 
 RUN pip install --no-cache-dir numpy
 

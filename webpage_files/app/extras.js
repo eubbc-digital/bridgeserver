@@ -77,7 +77,17 @@ async function handleFileDownload() {
 function initializeVideoStream(url) {
   var canvas = document.getElementById('video-canvas');
   var modalCanvas = document.getElementById('modal-video-canvas');
-  var player = new JSMpeg.Player(url, { canvas: modalCanvas });
+  var player;
+
+  try {
+    player = new JSMpeg.Player(url, { canvas: modalCanvas });
+    player.on('error', function(error) {
+      handleStreamError(error);
+    });
+  } catch (error) {
+    console.log("THIS IS THE ERROR: ", error);
+    handleStreamError(error);
+  }
 
   var showStreamButton = document.getElementById('show-stream-button');
   var showStreamWrapperButton = document.getElementById('show-stream-wrapper-button');
@@ -93,6 +103,14 @@ function initializeVideoStream(url) {
     videoModal.style.display = 'none';
     showStreamWrapperButton.style.display = 'block';
   });
+
+  function handleStreamError(error) {
+    console.error("Error initializing video stream: ", error);
+    var context = modalCanvas.getContext('2d');
+    context.fillStyle = 'blue';
+    context.font = '40px Arial';
+    context.fillText('No input stream available', 100, 200);
+  }
 }
 
 async function init() {

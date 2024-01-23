@@ -107,7 +107,7 @@ function initializeVideoStream(url) {
   function handleStreamError(error) {
     console.error("Error initializing video stream: ", error);
     var context = modalCanvas.getContext('2d');
-    context.fillStyle = 'blue';
+    context.fillStyle = 'white';
     context.font = '40px Arial';
     context.fillText('No input stream available', 100, 200);
   }

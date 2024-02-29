@@ -44,22 +44,28 @@ You need to edit the `server.env` file to set the following parameters:
 
 ### Running the Bridge Server
 Once configured, you can deploy the service running the following command:
+
 `docker-compose up -d`
 
 This command will deploy the service permanently, even if the host is rebooted.
 
 The next step is to configure Nginx, you can simply copy the file nginx.conf from the repository to the following location (If you are using Linux, Windows is not tested yet):
+
 _/etc/nginx/_
 
 Then run:
-`sudo nginx -t`
+
+`sudo nginx -t` (To test the configuration file)
+
 `sudo nginx -s reload`
+
 
 You can now access the Remote Lab bridge service through a web browser using the host name of the bridge server:
 `http://name_of_server/lab/`
 
 ### Stopping the Bridge Server
 To stop the service, you can simply run the following command:
+
 `docker-compose down`
 
 ## Using Book4RLab with your Remote Lab

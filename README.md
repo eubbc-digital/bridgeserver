@@ -11,10 +11,13 @@ The bridge server has already all the integration with Book4RLab. Only users who
 The installation of the brigde server is simplified using Docker technology.
 
 ### Prerequisites
-You will need to have Docker and Docker Compose installed on the host that will run the bridge server. We recommend to use Linux (e.g. Ubuntu). 
-Here is a tutorial to [install Docker in Ubuntu](https://docs.docker.com/engine/install/ubuntu)
-Here is a tutorial to [install Docker Compose in Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
-For the host with the VNC server, please install [TightVNC server](https://tightvnc.com) 
+- You will need to have Docker and Docker Compose installed on the host that will run the bridge server. We recommend to use Linux (e.g. Ubuntu).
+	-	Here is a tutorial to [install Docker in Ubuntu](https://docs.docker.com/engine/install/ubuntu)
+	-	Here is a tutorial to [install Docker Compose in Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
+- For the host with the VNC server, please install [TightVNC server](https://tightvnc.com)
+- You will need to have Docker and Docker Compose installed on the host that will run the bridge server. We recommend to use Linux (e.g. Ubuntu).
+	- Here is a tutorial to [install Nginx in Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-20-04) (Follow the tutorial until step 4)
+	- Here is a tutorial to [install Nginx in Windows](https://www.maketecheasier.com/install-nginx-server-windows/) (Not recommended)
 
 ### Building the Bridge Server
 Clone the repository and enter the bridgeserver directory.
@@ -37,43 +40,27 @@ You need to edit the `server.env` file to set the following parameters:
 - `BOOKING_URL`: The Book4RLab URL for validation of sessions. By default it points to the centralized Booking System at `https://eubbc-digital.upb.edu/booking/`
 - `VNC_SERVER_IP_ADDRESS`: The VNC server ip address of your Remote Lab.
 - `VNC_SERVER_PORT`: The VNC server port. By default, VNC server use port `5900`. Please check the TighVNC server setting.
+- `REFERER`: The referer is the complete URL of your webpage (including http:// or http://). This helps to track the origin of incoming requests, thus providing an extra layer of security..
 
 ### Running the Bridge Server
 Once configured, you can deploy the service running the following command:
-
 `docker-compose up -d`
 
 This command will deploy the service permanently, even if the host is rebooted.
 
-You can now access the Remote Lab bridge service through a web browser using the host name of the bridge server:
+The next step is to configure Nginx, you can simply copy the file nginx.conf from the repository to the following location (If you are using Linux, Windows is not tested yet):
+_/etc/nginx/_
 
-`http://name_of_server:3000`
+Then run:
+`sudo nginx -t`
+`sudo nginx -s reload`
+
+You can now access the Remote Lab bridge service through a web browser using the host name of the bridge server:
+`http://name_of_server/lab/`
 
 ### Stopping the Bridge Server
-To stop the service, you can simply running the following command: 
+To stop the service, you can simply run the following command:
 `docker-compose down`
-
-### Customizing the port on the bridge server
-You can customize the port of the bridge server, for example, to use the default HTTP port 80. 
-Simply, change the following line in the `docker-compose.yml` file:
-
-```
-ports:
-  - "3000:3000"
-```
-to
-```
-ports:
-  - "80:3000"
-```
-Then you will be able to access the remote lab directly through `http://name_of_server`
-
-
-Is not recommended to change the port:
-```
-- "6080:6080"
-```
-Because this is the default port that is proxying the websocket traffic between the VNC server and the webpage.
 
 ## Using Book4RLab with your Remote Lab
 In order to avoid sharing the VNC password with the students, the bridge server automatizes the access to the VNC Server without exposing the password. 

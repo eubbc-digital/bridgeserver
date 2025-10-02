@@ -10,46 +10,64 @@ app.use(express.static('public/', {
   defaultFiles: ['vnc.html'],
 }));
 
-let stream = createStream();
-function createStream() {
-    return new Stream({
-        streamUrl: process.env.CAMERA_URL,
-        wsPort: process.env.CAMERA_WS_PORT,
-        ffmpegOptions: {
-            '-stats': '',
-            '-f': 'mpegts',
-            '-codec:v': 'mpeg1video',
-            '-s': '640x360',
-            '-b:v': '700k',
-            '-r': '25',
-            '-bf': '0',
-            '-codec:a': 'mp2',
-            '-ar': '44100',
-            '-ac': '1',
-            '-b:a': '64k',
-            '-analyzeduration': '100M',
-            '-probesize': '100M',
-        }
-    });
+const cameraUrls = [
+  process.env.CAMERA1_URL,
+  process.env.CAMERA2_URL, 
+  process.env.CAMERA3_URL
+];
+const cameraPorts = [
+  process.env.CAMERA1_WS_PORT,
+  process.env.CAMERA2_WS_PORT,
+  process.env.CAMERA3_WS_PORT
+];
+
+function createStream(url, port) {
+  return new Stream({
+    streamUrl: url,
+    wsPort: port,
+    ffmpegOptions: {
+      '-stats': '',
+      '-f': 'mpegts',
+      '-codec:v': 'mpeg1video',
+      '-s': '640x360',
+      '-b:v': '700k',
+      '-r': '25',
+      '-bf': '0',
+      '-codec:a': 'mp2',
+      '-ar': '44100',
+      '-ac': '1',
+      '-b:a': '64k',
+      '-analyzeduration': '100M',
+      '-probesize': '100M',
+    }
+  });
 }
 
-stream.on('start', function () {
-    console.log('Stream started');
-});
+let streams = cameraUrls.map((url, index) => {
+  const stream = createStream(url, cameraPorts[index]);
+  
+  stream.on('start', () => {
+    console.log(`Stream ${index + 1} started`);
+  });
 
-stream.on('error', function (err) {
-    console.error('Stream error:', err);
-
+  stream.on('error', (err) => {
+    console.error(`Stream ${index + 1} error:`, err);
     if (err.code === 'ECONNRESET') {
-        console.log('Restarting stream');
-        stream = createStream();
+      console.log(`Restarting stream ${index + 1}`);
+      streams[index].stop();
+      streams[index] = createStream(url, cameraPorts[index]);
     }
+  });
+
+  return stream;
 });
 
-setInterval(function () {
-    console.log('Restarting stream');
-    stream.stop();
-    stream = createStream();
+setInterval(() => {
+  console.log('Restarting all streams');
+  streams.forEach((s, index) => {
+    s.stop();
+    streams[index] = createStream(cameraUrls[index], cameraPorts[index]);
+  });
 }, 1 * 60 * 60 * 1000);
 
 function validateReferer(req, res, next){

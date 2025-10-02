@@ -21,7 +21,7 @@ function timerControl(endDate) {
       UI.accessPassword = null;
       clearInterval(x);
       document.getElementById("timer").innerHTML = "TIME COMPLETED";
-      window.location.href = window.location.origin + '/usp-lab/alert_page.html';
+      window.location.href = window.location.origin + '/robot-lab/alert_page.html';
     }
   }, 1000);
 }
@@ -48,16 +48,16 @@ async function validateReservation(pwd, accessKey, credentialsData) {
       timerControl(end_date);
     } else {
       UI.accessPassword = null;
-      window.location.href = window.location.origin + '/usp-lab/alert_page.html';
+      window.location.href = window.location.origin + '/robot-lab/alert_page.html';
     }
   } else {
-    window.location.href = window.location.origin + '/usp-lab/alert_page.html';
+    window.location.href = window.location.origin + '/robot-lab/alert_page.html';
   }
 }
 
 async function handleFileDownload() {
   try {
-    const response = await fetch('/usp-lab/download-files');
+    const response = await fetch('/robot-lab/download-files');
     const blob = await response.blob();
 
     const url = window.URL.createObjectURL(blob);
@@ -74,20 +74,29 @@ async function handleFileDownload() {
   }
 }
 
-function initializeVideoStream(url) {
-  var canvas = document.getElementById('video-canvas');
-  var modalCanvas = document.getElementById('modal-video-canvas');
-  var player;
+function handleStreamError(canvas) {
+  const context = canvas.getContext('2d');
+  context.fillStyle = 'white';
+  context.font = '20px Arial';
+  context.fillText('No input stream available', 50, 180);
+}
 
-  try {
-    player = new JSMpeg.Player(url, { canvas: modalCanvas });
-    player.on('error', function(error) {
-      handleStreamError(error);
-    });
-  } catch (error) {
-    console.log("THIS IS THE ERROR: ", error);
-    handleStreamError(error);
-  }
+function initializeVideoStream() {
+  const cameraUrls = [
+    'wss://eubbc-digital.upb.edu/robot-lab/camera1/',
+    'wss://eubbc-digital.upb.edu/robot-lab/camera2/',
+    'wss://eubbc-digital.upb.edu/robot-lab/camera3/'
+  ];
+
+  const players = cameraUrls.map((url, index) => {
+    const modalCanvas = document.getElementById(`modal-video-canvas-${index + 1}`);
+    try {
+      return new JSMpeg.Player(url, { canvas: modalCanvas });
+    } catch (error) {
+      console.error(`Error initializing video stream ${index + 1}:`, error);
+      handleStreamError(modalCanvas);
+    }
+  });
 
   var showStreamButton = document.getElementById('show-stream-button');
   var showStreamWrapperButton = document.getElementById('show-stream-wrapper-button');
@@ -103,14 +112,6 @@ function initializeVideoStream(url) {
     videoModal.style.display = 'none';
     showStreamWrapperButton.style.display = 'block';
   });
-
-  function handleStreamError(error) {
-    console.error("Error initializing video stream: ", error);
-    var context = modalCanvas.getContext('2d');
-    context.fillStyle = 'white';
-    context.font = '40px Arial';
-    context.fillText('No input stream available', 100, 200);
-  }
 }
 
 async function init() {
@@ -124,8 +125,7 @@ async function init() {
   const downloadButton = document.getElementById('download-button');
   downloadButton.addEventListener('click', handleFileDownload);
 
-  const url = 'wss://eubbc-digital.upb.edu/usp-lab/camera/';
-  initializeVideoStream(url)
+  initializeVideoStream();
 }
 
 document.addEventListener('DOMContentLoaded', init);

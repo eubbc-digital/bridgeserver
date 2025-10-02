@@ -10,7 +10,7 @@ services:
       - "6080:6080"
       - "8001:8001"
     volumes:
-      - /home/adriana/resources/usp_lab_files:/app/lab_files
+      - /home/adriana/extras/resources/usp_lab_files:/app/lab_files
     deploy:
       restart_policy:
         condition: on-failure

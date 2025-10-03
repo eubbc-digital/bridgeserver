@@ -74,29 +74,54 @@
 }
 
 #video-modal {
+  /* Turn modal into a right-side panel (keeps IDs and JS intact) */
   display: none;
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
+  right: 0;
+  left: auto;
+  width: 420px; /* panel width */
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: transparent; /* no screen-dimming overlay */
   z-index: 9999;
+  pointer-events: auto;
 }
 
 #video-modal-content {
-  border: 1px solid white;
+  /* Fill the side panel area and allow scrolling */
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 10000;
+  border-left: 1px solid rgba(255,255,255,0.7);
+  background: rgba(0, 0, 0, 0.5);
+  overflow: auto;
+  padding: 10px;
 }
 
 #close-modal-button {
-  position: absolute;
-  bottom: -50px;
-  left: 50%;
-  transform: translateX(-50%);
+  /* Keep close control visible at top of panel */
+  position: sticky;
+  top: 0;
+  left: auto;
+  transform: none;
+  margin-left: auto;
+  display: inline-block;
   z-index: 10001;
+}
+
+/* Make camera grid single column in the side panel for readability */
+#video-modal .camera-grid {
+  grid-template-columns: 1fr;
+}
+
+/* Make canvases responsive within the side panel */
+#video-modal canvas {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
 }

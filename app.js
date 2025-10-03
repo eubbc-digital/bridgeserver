@@ -4,6 +4,7 @@ const app = express();
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
+const multer = require('multer');
 require('dotenv').config();
 
 app.use(express.static('public/', {
@@ -118,7 +119,49 @@ app.get('/download-files', (req, res) => {
   res.attachment(zipFileName);
 });
 
+const uploadDir = '/app/lab_files';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext === '.py' || ext === '.ipynb') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .py and .ipynb files are allowed'));
+    }
+  },
+  limits: { files: 20 }
+});
+
+app.post('/upload-file', upload.any(), (req, res) => {
+  const files = req.files || (req.file ? [req.file] : []);
+  if (!files || files.length === 0) {
+    return res.status(400).json({ success: false, message: 'No file uploaded' });
+  }
+  const filenames = files.map(f => f.filename);
+  return res.json({ success: true, message: 'File(s) uploaded successfully', filenames });
+});
+
+app.use((err, req, res, next) => {
+  if (err) {
+    return res.status(400).json({ success: false, message: err.message || 'Upload failed' });
+  }
+  next();
+});
+
 app.listen(3002, () => {
   console.log('Server is running on port localhost:3002');
 });
-

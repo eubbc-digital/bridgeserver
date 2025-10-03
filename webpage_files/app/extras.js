@@ -74,6 +74,31 @@ async function handleFileDownload() {
   }
 }
 
+async function handleFileUpload(files) {
+  if (!files || files.length === 0) return;
+  try {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('file', file);
+    }
+    const response = await fetch('/robot-lab/upload-file', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || 'Upload failed');
+    }
+    const result = await response.json();
+    const list = Array.isArray(result.filenames) ? result.filenames.join('\n') : (result.filename || '');
+    alert(`Upload completed:\n${list}`);
+  } catch (error) {
+    console.error('Upload error:', error);
+    const msg = error?.message || 'Upload failed';
+    alert(msg);
+  }
+}
+
 function handleStreamError(canvas) {
   const context = canvas.getContext('2d');
   context.fillStyle = 'white';
@@ -124,6 +149,11 @@ async function init() {
 
   const downloadButton = document.getElementById('download-button');
   downloadButton.addEventListener('click', handleFileDownload);
+
+  const uploadButton = document.getElementById('upload-button');
+  const fileInput = document.getElementById('file-input');
+  uploadButton.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
 
   initializeVideoStream();
 }

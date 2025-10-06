@@ -74,21 +74,19 @@
 }
 
 #video-modal {
-  /* Turn modal into a right-side panel (keeps IDs and JS intact) */
   display: none;
   position: fixed;
   top: 0;
   right: 0;
   left: auto;
-  width: 420px; /* panel width */
+  width: 420px;
   height: 100%;
-  background-color: transparent; /* no screen-dimming overlay */
+  background-color: transparent;
   z-index: 9999;
   pointer-events: auto;
 }
 
 #video-modal-content {
-  /* Fill the side panel area and allow scrolling */
   position: absolute;
   top: 0;
   left: 0;
@@ -102,7 +100,6 @@
 }
 
 #close-modal-button {
-  /* Keep close control visible at top of panel */
   position: sticky;
   top: 0;
   left: auto;
@@ -112,12 +109,10 @@
   z-index: 10001;
 }
 
-/* Make camera grid single column in the side panel for readability */
 #video-modal .camera-grid {
   grid-template-columns: 1fr;
 }
 
-/* Make canvases responsive within the side panel */
 #video-modal canvas {
   width: 100%;
   height: auto;

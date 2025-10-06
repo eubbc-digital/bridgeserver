@@ -11,16 +11,34 @@ app.use(express.static('public/', {
   defaultFiles: ['vnc.html'],
 }));
 
-const cameraUrls = [
-  process.env.CAMERA1_URL,
-  process.env.CAMERA2_URL, 
-  process.env.CAMERA3_URL
-];
-const cameraPorts = [
-  process.env.CAMERA1_WS_PORT,
-  process.env.CAMERA2_WS_PORT,
-  process.env.CAMERA3_WS_PORT
-];
+function loadCamerasFromEnv() {
+  const raw = process.env.CAMERAS;
+  if (!raw) {
+    console.error('CAMERAS env var is required. Example: CAMERAS=[{"url":"rtsp://...","wsPort":8011}]');
+    process.exit(1);
+  }
+  let arr;
+  try {
+    arr = JSON.parse(raw);
+  } catch (e) {
+    console.error('Failed to parse CAMERAS JSON:', e.message);
+    process.exit(1);
+  }
+  if (!Array.isArray(arr) || arr.length === 0) {
+    console.error('CAMERAS must be a non-empty JSON array.');
+    process.exit(1);
+  }
+  const normalized = arr
+    .map((c, i) => ({ url: c && c.url, wsPort: Number(c && c.wsPort), _idx: i }))
+    .filter(c => typeof c.url === 'string' && c.url.length > 0 && Number.isFinite(c.wsPort));
+  if (normalized.length !== arr.length) {
+    console.error('Invalid CAMERAS entries found (missing url or wsPort). Please fix the configuration.');
+    process.exit(1);
+  }
+  return normalized;
+}
+
+const cameras = loadCamerasFromEnv();
 
 function createStream(url, port) {
   return new Stream({
@@ -44,19 +62,19 @@ function createStream(url, port) {
   });
 }
 
-let streams = cameraUrls.map((url, index) => {
-  const stream = createStream(url, cameraPorts[index]);
+let streams = cameras.map((cam, index) => {
+  const stream = createStream(cam.url, cam.wsPort);
   
   stream.on('start', () => {
-    console.log(`Stream ${index + 1} started`);
+    console.log(`Stream ${index + 1} started (ws:${cam.wsPort})`);
   });
 
   stream.on('error', (err) => {
-    console.error(`Stream ${index + 1} error:`, err);
-    if (err.code === 'ECONNRESET') {
-      console.log(`Restarting stream ${index + 1}`);
-      streams[index].stop();
-      streams[index] = createStream(url, cameraPorts[index]);
+    console.error(`Stream ${index + 1} error (ws:${cam.wsPort}):`, err);
+    if (err && err.code === 'ECONNRESET') {
+      console.log(`Restarting stream ${index + 1} (ws:${cam.wsPort})`);
+      try { streams[index].stop(); } catch (_) {}
+      streams[index] = createStream(cameras[index].url, cameras[index].wsPort);
     }
   });
 
@@ -64,10 +82,14 @@ let streams = cameraUrls.map((url, index) => {
 });
 
 setInterval(() => {
+  if (!streams.length) return;
   console.log('Restarting all streams');
   streams.forEach((s, index) => {
-    s.stop();
-    streams[index] = createStream(cameraUrls[index], cameraPorts[index]);
+    try { s.stop(); } catch (_) {}
+    const cam = cameras[index];
+    if (cam) {
+      streams[index] = createStream(cam.url, cam.wsPort);
+    }
   });
 }, 1 * 60 * 60 * 1000);
 
@@ -89,6 +111,10 @@ app.get('/api/credentials', validateReferer, (req, res) => {
     booking_url: process.env.BOOKING_URL,
   }
   res.json(response);
+});
+
+app.get('/api/cameras', validateReferer, (req, res) => {
+  res.json({ count: cameras.length });
 });
 
 app.get('/download-files', (req, res) => {

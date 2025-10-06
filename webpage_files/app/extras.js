@@ -106,22 +106,48 @@ function handleStreamError(canvas) {
   context.fillText('No input stream available', 50, 180);
 }
 
-function initializeVideoStream() {
-  const cameraUrls = [
-    'wss://eubbc-digital.upb.edu/robot-lab/camera1/',
-    'wss://eubbc-digital.upb.edu/robot-lab/camera2/',
-    'wss://eubbc-digital.upb.edu/robot-lab/camera3/'
-  ];
-
-  const players = cameraUrls.map((url, index) => {
-    const modalCanvas = document.getElementById(`modal-video-canvas-${index + 1}`);
-    try {
-      return new JSMpeg.Player(url, { canvas: modalCanvas });
-    } catch (error) {
-      console.error(`Error initializing video stream ${index + 1}:`, error);
-      handleStreamError(modalCanvas);
+async function initializeVideoStream() {
+  let count = 0;
+  try {
+    const resp = await fetch('api/cameras');
+    if (resp.ok) {
+      const data = await resp.json();
+      count = Number(data.count) || 0;
     }
-  });
+  } catch (e) {
+    console.warn('Could not fetch camera count, defaulting to 1:', e);
+    count = 1;
+  }
+
+  const origin = window.location.origin.replace(/^http/, 'ws');
+  const base = `${origin}/robot-lab`;
+  const cameraGrid = document.getElementById('camera-grid');
+  cameraGrid.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const container = document.createElement('div');
+    container.className = 'camera-container';
+
+    const canvas = document.createElement('canvas');
+    canvas.id = `modal-video-canvas-${i + 1}`;
+    canvas.width = 640;
+    canvas.height = 360;
+
+    const label = document.createElement('p');
+    label.textContent = `Camera ${i + 1}`;
+
+    container.appendChild(canvas);
+    container.appendChild(label);
+    cameraGrid.appendChild(container);
+
+    const url = `${base}/camera${i + 1}/`;
+    try {
+      new JSMpeg.Player(url, { canvas });
+    } catch (error) {
+      console.error(`Error initializing video stream ${i + 1}:`, error);
+      handleStreamError(canvas);
+    }
+  }
 
   var showStreamButton = document.getElementById('show-stream-button');
   var showStreamWrapperButton = document.getElementById('show-stream-wrapper-button');
@@ -155,7 +181,7 @@ async function init() {
   uploadButton.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
 
-  initializeVideoStream();
+  await initializeVideoStream();
 }
 
 document.addEventListener('DOMContentLoaded', init);

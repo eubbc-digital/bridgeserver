@@ -106,6 +106,8 @@ function handleStreamError(canvas) {
   context.fillText('No input stream available', 50, 180);
 }
 
+let camerasInitialized = false;
+
 async function initializeVideoStream() {
   let count = 0;
   try {
@@ -130,8 +132,8 @@ async function initializeVideoStream() {
 
     const canvas = document.createElement('canvas');
     canvas.id = `modal-video-canvas-${i + 1}`;
-    canvas.width = 640;
-    canvas.height = 360;
+    canvas.width = 960;
+    canvas.height = 540;
 
     const label = document.createElement('p');
     label.textContent = `Camera ${i + 1}`;
@@ -149,20 +151,81 @@ async function initializeVideoStream() {
     }
   }
 
-  var showStreamButton = document.getElementById('show-stream-button');
-  var showStreamWrapperButton = document.getElementById('show-stream-wrapper-button');
-  var videoModal = document.getElementById('video-modal');
-  var closeModalButton = document.getElementById('close-modal-button');
+  camerasInitialized = true;
+}
 
-  showStreamButton.addEventListener('click', function() {
-    showStreamWrapperButton.style.display = 'none';
-    videoModal.style.display = 'block';
-  });
+function setSplit(percent) {
+  document.documentElement.style.setProperty('--split', `${percent}%`);
+}
 
-  closeModalButton.addEventListener('click', function() {
-    videoModal.style.display = 'none';
-    showStreamWrapperButton.style.display = 'block';
-  });
+function wireStreamToggle() {
+  const showStreamButton = document.getElementById('show-stream-button');
+  const cameraPanel = document.getElementById('camera-panel');
+
+  async function onToggleStream() {
+    const body = document.body;
+    const showing = !body.classList.contains('with-cameras');
+    if (showing) {
+      body.classList.add('with-cameras');
+      cameraPanel.setAttribute('aria-hidden', 'false');
+      setSplit(80);
+      if (!camerasInitialized) await initializeVideoStream();
+      showStreamButton.textContent = 'Hide Stream 📷';
+    } else {
+      body.classList.remove('with-cameras');
+      cameraPanel.setAttribute('aria-hidden', 'true');
+      setSplit(100);
+      showStreamButton.textContent = 'Show Stream 📷';
+    }
+  }
+
+  showStreamButton?.addEventListener('click', onToggleStream);
+}
+
+function wireSplitter() {
+  const splitter = document.getElementById('splitter');
+  const container = document.getElementById('noVNC_container');
+  const cameraPanel = document.getElementById('camera-panel');
+  if (!splitter || !container || !cameraPanel) return;
+
+  let dragging = false;
+  const MIN_PANEL_PX = 200;
+
+  function setSplitFromClientX(clientX) {
+    const rect = container.getBoundingClientRect();
+    const minLeft = rect.left + MIN_PANEL_PX;
+    const maxLeft = rect.right - MIN_PANEL_PX;
+    const clamped = Math.max(minLeft, Math.min(maxLeft, clientX));
+    const ratio = (clamped - rect.left) / rect.width;
+    const percent = Math.round(ratio * 100);
+    setSplit(percent);
+  }
+
+  function startDrag(e) {
+    if (cameraPanel.getAttribute('aria-hidden') === 'true') return;
+    dragging = true;
+    document.body.style.cursor = 'col-resize';
+    splitter.setAttribute('aria-grabbed', 'true');
+    e.preventDefault();
+  }
+
+  function drag(e) {
+    if (!dragging) return;
+    if (e.buttons === 0) return endDrag();
+    setSplitFromClientX(e.clientX);
+  }
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    document.body.style.cursor = '';
+    splitter.removeAttribute('aria-grabbed');
+  }
+
+  splitter.addEventListener('mousedown', startDrag);
+  window.addEventListener('mousemove', drag);
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('mouseleave', endDrag);
 }
 
 async function init() {
@@ -181,7 +244,8 @@ async function init() {
   uploadButton.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files));
 
-  await initializeVideoStream();
+  wireStreamToggle();
+  wireSplitter();
 }
 
 document.addEventListener('DOMContentLoaded', init);

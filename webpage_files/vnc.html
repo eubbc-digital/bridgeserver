@@ -65,13 +65,6 @@
     </div>
   </div>
 
-  <div id="video-modal" style="display: none;">
-    <div id="video-modal-content">
-      <div id="camera-grid" class="camera-grid"></div>
-      <button id="close-modal-button" class="extras-button">Close</button>
-    </div>
-  </div>
-
   <div id="noVNC_fallback_error" class="noVNC_center">
     <div>
       <div>noVNC encountered an error:</div>
@@ -361,6 +354,14 @@
 
   <!-- This is where the RFB elements will attach -->
   <div id="noVNC_container">
+    <!-- Left: VNC mount area -->
+    <div id="vnc-area"></div>
+    <!-- Middle: draggable splitter -->
+    <div id="splitter" role="separator" aria-orientation="vertical" aria-label="Resize panels"></div>
+    <!-- Right: camera panel -->
+    <div id="camera-panel" aria-hidden="true">
+      <div id="camera-grid" class="camera-grid"></div>
+    </div>
     <!-- Note that Google Chrome on Android doesn't respect any of these,
              html attributes which attempt to disable text suggestions on the
              on-screen keyboard. Let's hope Chrome implements the ime-mode

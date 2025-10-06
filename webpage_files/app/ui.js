@@ -1042,10 +1042,10 @@ const UI = {
         }
         url += '/' + path;
 
-        UI.rfb = new RFB(document.getElementById('noVNC_container'), url,
-                         { shared: UI.getSetting('shared'),
-                           repeaterID: UI.getSetting('repeaterID'),
-                           credentials: { password: password } });
+        UI.rfb = new RFB(document.getElementById('vnc-area'), url,
+                    { shared: UI.getSetting('shared'),
+                    repeaterID: UI.getSetting('repeaterID'),
+                    credentials: { password: password } });
         UI.rfb.addEventListener("connect", UI.connectFinished);
         UI.rfb.addEventListener("disconnect", UI.disconnectFinished);
         UI.rfb.addEventListener("serververification", UI.serverVerify);
@@ -1117,6 +1117,12 @@ const UI = {
 
         // Do this last because it can only be used on rendered elements
         UI.rfb.focus();
+
+        // Nudge layout to ensure the canvas sizes correctly even if cameras were toggled first
+        try {
+            const ev = new Event('resize');
+            window.dispatchEvent(ev);
+        } catch (_) {}
     },
 
     disconnectFinished(e) {

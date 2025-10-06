@@ -57,11 +57,53 @@
   background: linear-gradient(to top, rgb(110, 132, 163), rgb(105, 125, 155));
 }
 
+:root { --split: 80%; }
+
+#noVNC_container {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 0;
+}
+
+#vnc-area {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+#vnc-area canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+#vnc-area, #camera-panel { min-width: 0; min-height: 0; }
+
+#splitter {
+  display: none;
+  cursor: col-resize;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: saturate(120%);
+  min-height: 100%;
+  border-left: 1px solid rgba(255,255,255,0.4);
+  border-right: 1px solid rgba(0,0,0,0.3);
+}
+#splitter:hover { background: rgba(255,255,255,0.35); }
+
+#camera-panel {
+  display: none;
+  overflow-y: auto;
+  border-left: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.35);
+}
+
 .camera-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: 12px;
   padding: 10px;
+  box-sizing: border-box;
 }
 
 .camera-container {
@@ -73,50 +115,20 @@
   color: white;
 }
 
-#video-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: auto;
-  width: 420px;
-  height: 100%;
-  background-color: transparent;
-  z-index: 9999;
-  pointer-events: auto;
-}
-
-#video-modal-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10000;
-  border-left: 1px solid rgba(255,255,255,0.7);
-  background: rgba(0, 0, 0, 0.5);
-  overflow: auto;
-  padding: 10px;
-}
-
-#close-modal-button {
-  position: sticky;
-  top: 0;
-  left: auto;
-  transform: none;
-  margin-left: auto;
-  display: inline-block;
-  z-index: 10001;
-}
-
-#video-modal .camera-grid {
-  grid-template-columns: 1fr;
-}
-
-#video-modal canvas {
+#camera-panel canvas,
+.jsmpeg canvas {
   width: 100%;
   height: auto;
   max-width: 100%;
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 4px;
+  box-sizing: border-box;
 }
+
+body.with-cameras #noVNC_container {
+  grid-template-columns: var(--split) 6px calc(100% - var(--split) - 6px);
+  align-items: stretch;
+}
+body.with-cameras #vnc-area { grid-column: 1; grid-row: 1; }
+body.with-cameras #splitter { grid-column: 2; grid-row: 1; display: block; align-self: stretch; }
+body.with-cameras #camera-panel { grid-column: 3; grid-row: 1; display: block; }

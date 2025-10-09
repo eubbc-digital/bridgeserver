@@ -62,25 +62,24 @@ function createStream(url, port) {
   });
 }
 
-const WATCHDOG_TIMEOUT_MS = Number(process.env.STREAM_WATCHDOG_TIMEOUT_MS || 10000); // 10s without frames -> restart
-const WATCHDOG_CHECK_MS = Number(process.env.STREAM_WATCHDOG_CHECK_MS || 3000); // check every 3s
-const WATCHDOG_MAX_BACKOFF_MS = Number(process.env.STREAM_WATCHDOG_MAX_BACKOFF_MS || 60000); // cap backoff at 60s
+// Watchdog config (tunable via env)
+const WATCHDOG_TIMEOUT_MS = Number(process.env.STREAM_WATCHDOG_TIMEOUT_MS || 10000); // 10s without frames -> consider idle
+const WATCHDOG_CHECK_MS = Number(process.env.STREAM_WATCHDOG_CHECK_MS || 60000); // check every 60s to reduce spam
+const STREAM_RETRY_INTERVAL_MS = Number(process.env.STREAM_RETRY_INTERVAL_MS || 60000); // always retry after 60s when idle
 
 let streams = [];
-const monitors = cameras.map(() => ({ lastData: Date.now(), timer: null, backoff: 1000, scheduled: false }));
+const monitors = cameras.map(() => ({ lastData: Date.now(), timer: null, scheduled: false, restartTimer: null }));
 
 function scheduleRestart(index, reason) {
   const monitor = monitors[index];
   if (!monitor) return;
   if (monitor.scheduled) return;
-  const delay = monitor.backoff || 1000;
   monitor.scheduled = true;
-  console.warn(`Scheduling restart for stream ${index + 1} in ${Math.round(delay / 1000)}s due to: ${reason}`);
-  setTimeout(() => {
+  monitor.restartTimer = setTimeout(() => {
     monitor.scheduled = false;
+    monitor.restartTimer = null;
     restartStream(index, reason);
-    monitor.backoff = Math.min((monitor.backoff || 1000) * 2, WATCHDOG_MAX_BACKOFF_MS);
-  }, delay);
+  }, STREAM_RETRY_INTERVAL_MS);
 }
 
 function setupStream(index) {
@@ -90,7 +89,11 @@ function setupStream(index) {
   const monitor = monitors[index];
   const markData = () => {
     monitor.lastData = Date.now();
-    monitor.backoff = 1000; 
+    if (monitor.scheduled && monitor.restartTimer) {
+      try { clearTimeout(monitor.restartTimer); } catch (_) {}
+      monitor.restartTimer = null;
+      monitor.scheduled = false;
+    }
   };
 
   stream.on('start', () => {
@@ -111,7 +114,6 @@ function setupStream(index) {
   monitor.timer = setInterval(() => {
     const idleMs = Date.now() - monitor.lastData;
     if (idleMs > WATCHDOG_TIMEOUT_MS) {
-      console.warn(`Watchdog: no video data for ${Math.round(idleMs / 1000)}s on stream ${index + 1} (ws:${cam.wsPort}).`);
       scheduleRestart(index, `watchdog idle ${idleMs}ms`);
     }
   }, WATCHDOG_CHECK_MS);

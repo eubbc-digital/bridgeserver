@@ -62,33 +62,87 @@ function createStream(url, port) {
   });
 }
 
-let streams = cameras.map((cam, index) => {
+const WATCHDOG_TIMEOUT_MS = Number(process.env.STREAM_WATCHDOG_TIMEOUT_MS || 10000); // 10s without frames -> restart
+const WATCHDOG_CHECK_MS = Number(process.env.STREAM_WATCHDOG_CHECK_MS || 3000); // check every 3s
+const WATCHDOG_MAX_BACKOFF_MS = Number(process.env.STREAM_WATCHDOG_MAX_BACKOFF_MS || 60000); // cap backoff at 60s
+
+let streams = [];
+const monitors = cameras.map(() => ({ lastData: Date.now(), timer: null, backoff: 1000, scheduled: false }));
+
+function scheduleRestart(index, reason) {
+  const monitor = monitors[index];
+  if (!monitor) return;
+  if (monitor.scheduled) return;
+  const delay = monitor.backoff || 1000;
+  monitor.scheduled = true;
+  console.warn(`Scheduling restart for stream ${index + 1} in ${Math.round(delay / 1000)}s due to: ${reason}`);
+  setTimeout(() => {
+    monitor.scheduled = false;
+    restartStream(index, reason);
+    monitor.backoff = Math.min((monitor.backoff || 1000) * 2, WATCHDOG_MAX_BACKOFF_MS);
+  }, delay);
+}
+
+function setupStream(index) {
+  const cam = cameras[index];
   const stream = createStream(cam.url, cam.wsPort);
-  
+
+  const monitor = monitors[index];
+  const markData = () => {
+    monitor.lastData = Date.now();
+    monitor.backoff = 1000; 
+  };
+
   stream.on('start', () => {
     console.log(`Stream ${index + 1} started (ws:${cam.wsPort})`);
+    markData();
+  });
+
+  ['camdata', 'mpeg1data', 'data'].forEach((evt) => {
+    try { stream.on(evt, markData); } catch (_) {}
   });
 
   stream.on('error', (err) => {
     console.error(`Stream ${index + 1} error (ws:${cam.wsPort}):`, err);
-    if (err && err.code === 'ECONNRESET') {
-      console.log(`Restarting stream ${index + 1} (ws:${cam.wsPort})`);
-      try { streams[index].stop(); } catch (_) {}
-      streams[index] = createStream(cameras[index].url, cameras[index].wsPort);
-    }
+    scheduleRestart(index, err && err.code ? `error:${err.code}` : 'error');
   });
 
+  if (monitor.timer) clearInterval(monitor.timer);
+  monitor.timer = setInterval(() => {
+    const idleMs = Date.now() - monitor.lastData;
+    if (idleMs > WATCHDOG_TIMEOUT_MS) {
+      console.warn(`Watchdog: no video data for ${Math.round(idleMs / 1000)}s on stream ${index + 1} (ws:${cam.wsPort}).`);
+      scheduleRestart(index, `watchdog idle ${idleMs}ms`);
+    }
+  }, WATCHDOG_CHECK_MS);
+
   return stream;
-});
+}
+
+function restartStream(index, reason) {
+  const cam = cameras[index];
+  const prev = streams[index];
+  console.log(`Restarting stream ${index + 1} (ws:${cam.wsPort}) due to: ${reason}`);
+  try {
+    if (prev) {
+      try { prev.removeAllListeners && prev.removeAllListeners(); } catch (_) {}
+      try { prev.stop && prev.stop(); } catch (_) {}
+    }
+  } catch (_) {}
+  setTimeout(() => {
+    streams[index] = setupStream(index);
+  }, 200);
+}
+
+streams = cameras.map((_, index) => setupStream(index));
 
 setInterval(() => {
   if (!streams.length) return;
   console.log('Restarting all streams');
   streams.forEach((s, index) => {
-    try { s.stop(); } catch (_) {}
     const cam = cameras[index];
     if (cam) {
-      streams[index] = createStream(cam.url, cam.wsPort);
+      scheduleRestart(index, 'periodic refresh');
     }
   });
 }, 1 * 60 * 60 * 1000);
